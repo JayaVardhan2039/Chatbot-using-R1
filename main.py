@@ -1,8 +1,13 @@
 '''from openai import OpenAI
 
 client = OpenAI(
+<<<<<<< HEAD
   base_url=BASE_URL,
   api_key=API_KEY,
+=======
+  base_url="<base-url>",
+  api_key="<your-api-key>",
+>>>>>>> 32fcf0dd1a2a171889fd85f58e62d667c87144ec
 )
 
 completion = client.chat.completions.create(
