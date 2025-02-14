@@ -1,8 +1,8 @@
 '''from openai import OpenAI
 
 client = OpenAI(
-  base_url="https://openrouter.ai/api/v1",
-  api_key="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",
+  base_url=BASE_URL,
+  api_key=API_KEY,
 )
 
 completion = client.chat.completions.create(
@@ -17,20 +17,21 @@ completion = client.chat.completions.create(
 
 print(completion.choices[0].message.content)
 '''
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, send_file, request, jsonify
 from openai import OpenAI
+from config import BASE_URL, API_KEY
 
 app = Flask(__name__)
 
 # Initialize OpenAI client
 client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="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"  # Replace with your actual API key
+    base_url=BASE_URL,
+    api_key=API_KEY  # Replace with your actual API key
 )
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_file('index.html')  # Serve index.html from the root folder
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -51,4 +52,4 @@ def chat():
     return jsonify({"response": bot_response})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
