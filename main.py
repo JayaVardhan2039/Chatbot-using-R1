@@ -28,6 +28,7 @@ from config import BASE_URL, API_KEY
 
 app = Flask(__name__)
 
+
 # Initialize OpenAI client
 client = OpenAI(
     base_url=BASE_URL,
