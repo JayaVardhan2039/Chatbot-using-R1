@@ -219,6 +219,8 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
+        
+        
     </style>
 </head>
 <body>
@@ -238,7 +240,10 @@
             </script>
         </div>
         <div class="chat-messages" id="chatMessages">
-            <!-- Chat messages will be inserted here -->
+            <div class="message bot">
+                <div class="avatar">AI</div>
+                <div class="message-content">Hello! How can I help you today?</div>
+            </div>
         </div>
         <div class="chat-input">
             <input type="text" id="userInput" placeholder="Type your message...">
@@ -270,8 +275,157 @@
             </div>
         </div>
     </div>
-
     <script>
+function sendMessage() {
+    let userMessage = document.getElementById("userInput").value.trim();
+    if (!userMessage) return;
+
+    let chatbox = document.querySelector(".chat-messages");
+
+    // Append user message
+    let userMsgDiv = document.createElement("div");
+    userMsgDiv.classList.add("message", "user");
+    userMsgDiv.innerHTML = `
+        <div class="avatar">U</div>
+        <div class="message-content">${userMessage}</div>
+    `;
+    chatbox.appendChild(userMsgDiv);
+
+    document.getElementById("userInput").value = "";
+    chatbox.scrollTop = chatbox.scrollHeight;
+
+    // Add loading animation
+    let loadingDiv = document.createElement("div");
+    loadingDiv.classList.add("message", "bot");
+    loadingDiv.id = "loadingMessage";
+    loadingDiv.innerHTML = `
+        <div class="avatar">AI</div>
+        <div class="message-content loading">
+            <span></span><span></span><span></span>
+        </div>
+    `;
+    chatbox.appendChild(loadingDiv);
+    chatbox.scrollTop = chatbox.scrollHeight;
+
+    // Fetch bot response
+    fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("loadingMessage").remove(); // Remove loading animation
+
+        let botMsgDiv = document.createElement("div");
+        botMsgDiv.classList.add("message", "bot");
+        botMsgDiv.innerHTML = `
+            <div class="avatar">AI</div>
+            <div class="message-content">${formatResponse(data.response)}</div>
+        `;
+        chatbox.appendChild(botMsgDiv);
+        chatbox.scrollTop = chatbox.scrollHeight;
+    })
+    .catch(error => {
+        document.getElementById("loadingMessage").remove(); // Remove loading animation on error
+        console.error("Error:", error);
+    });
+}
+
+// Function to format response with proper indentation
+function formatResponse(response) {
+    return response.replace(/\n/g, "<br>"); // Converts new lines to <br> for formatting
+}
+
+// Function to format response with proper indentation
+function formatResponse(response) {
+    return response.replace(/\n/g, "<br>"); // Converts new lines to <br> for formatting
+}
+
+    
+        function appendMessage(sender, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}`;
+            messageElement.innerHTML = `
+                <div class="avatar">${sender === 'user' ? 'U' : 'AI'}</div>
+                <div class="message-content">${message}</div>
+            `;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    
+        function recordVoice() {
+            alert('Voice recording feature coming soon!');
+        }
+    
+        function toggleFileOptions() {
+            const fileOptions = document.getElementById('fileOptions');
+            const plusIcon = document.getElementById('plusIcon');
+            fileOptions.classList.toggle('show');
+            plusIcon.style.transform = fileOptions.classList.contains('show') ? 'rotate(45deg)' : 'rotate(0deg)';
+        }
+    
+        function handleUpload(type) {
+            alert(`${type} upload feature coming soon!`);
+            toggleFileOptions();
+        }
+    
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+    
+        document.addEventListener('click', function(event) {
+            const fileOptions = document.getElementById('fileOptions');
+            const toggleButton = document.querySelector('.toggle-button');
+            if (!event.target.closest('.file-options') && !event.target.closest('.toggle-button')) {
+                fileOptions.classList.remove('show');
+                document.getElementById('plusIcon').style.transform = 'rotate(0deg)';
+            }
+        });
+    
+        // Add event listener for Enter key press
+        document.getElementById('userInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+    
+    <style>
+        /* Loading dots animation */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            color: gray;
+        }
+    
+        .loading span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: rgb(242, 239, 239);
+            border-radius: 50%;
+            animation: loadingDots 1.5s infinite;
+        }
+    
+        .loading span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loading span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+    
+        @keyframes loadingDots {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+    </style>
+    
+   <!-- <script>
         function sendMessage() {
             let userMessage = document.getElementById("userInput").value.trim();
             if (!userMessage) return;
@@ -357,6 +511,6 @@
                 sendMessage();
             }
         });
-    </script>
+    </script>-->
 </body>
 </html> 
