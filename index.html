@@ -95,7 +95,7 @@
         .message-content {
             background-color: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(5px);
-            padding: 0.5rem 1rem;
+            padding: 1rem 1.5rem;
             border-radius: 1.5rem;
             color: white;
         }
@@ -233,7 +233,6 @@
                 function toggleTheme() {
                     document.body.classList.toggle("dark-mode");
             
-                    // Change icon dynamically
                     let btn = document.querySelector(".toggle-button");
                     btn.innerHTML = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
                 }
@@ -282,7 +281,6 @@
 
             let chatbox = document.querySelector(".chat-messages");
 
-            // Append user message
             let userMsgDiv = document.createElement("div");
             userMsgDiv.classList.add("message", "user");
             userMsgDiv.innerHTML = `
@@ -294,7 +292,6 @@
             document.getElementById("userInput").value = "";
             chatbox.scrollTop = chatbox.scrollHeight;
 
-            // Hide buttons and show stop button
             document.querySelectorAll('.chat-input button').forEach(button => button.style.display = 'none');
             let stopButton = document.createElement("button");
             stopButton.classList.add("stop-button");
@@ -311,7 +308,6 @@
             };
             document.querySelector('.chat-input').appendChild(stopButton);
 
-            // Add loading animation
             let loadingDiv = document.createElement("div");
             loadingDiv.classList.add("message", "bot");
             loadingDiv.id = "loadingMessage";
@@ -324,7 +320,6 @@
             chatbox.appendChild(loadingDiv);
             chatbox.scrollTop = chatbox.scrollHeight;
 
-            // Fetch bot response with abort controller
             const controller = new AbortController();
             fetch('/chat', {
                 method: 'POST',
@@ -334,8 +329,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("loadingMessage").remove(); // Remove loading animation
-                stopButton.remove(); // Remove stop button
+                document.getElementById("loadingMessage").remove();
+                stopButton.remove();
                 document.querySelectorAll('.chat-input button').forEach(button => button.style.display = 'flex');
 
                 let botMsgDiv = document.createElement("div");
@@ -353,17 +348,52 @@
                 } else {
                     console.error("Error:", error);
                 }
-                document.getElementById("loadingMessage").remove(); // Remove loading animation on error
-                stopButton.remove(); // Remove stop button
+                document.getElementById("loadingMessage").remove();
+                stopButton.remove();
                 document.querySelectorAll('.chat-input button').forEach(button => button.style.display = 'flex');
             });
         }
 
-        // Function to format response with proper indentation
         function formatResponse(response) {
-            return response.replace(/\n/g, "<br>"); // Converts new lines to <br> for formatting
-        }
+    response = response.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+    response = response.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+    response = response.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+    response = response.replace(/^#### (.*$)/gm, '<h4>$1</h4>');
+    response = response.replace(/^##### (.*$)/gm, '<h5>$1</h5>');
+    response = response.replace(/^###### (.*$)/gm, '<h6>$1</h6>');
 
+    response = response.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    response = response.replace(/__(.*?)__/gim, '<strong>$1</strong>');
+
+    response = response.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+    response = response.replace(/_(.*?)_/gim, '<em>$1</em>');
+
+    response = response.replace(/`(.*?)`/gim, '<code>$1</code>');
+
+    response = response.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+
+    response = response.replace(/^\* (.*$)/gm, '<li>$1</li>');
+    response = response.replace(/(<li>.*<\/li>)/gms, '<ul>$1</ul>');
+
+    response = response.replace(/^\d+\. (.*$)/gm, '<li>$1</li>');
+    response = response.replace(/(<li>.*<\/li>)/gms, '<ol>$1</ol>');
+
+    response = response.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>');
+
+    response = response.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1">');
+
+    response = response.replace(/^\*\*\*$/gm, '<hr>');
+    response = response.replace(/^---$/gm, '<hr>');
+
+    response = response.replace(/```(\w*)\n([\s\S]*?)```/gim, (match, lang, code) => {
+        return `<pre><code class="${lang || ''}">${code.trim()}</code></pre>`;
+    });
+
+    response = response.replace(/(?<!<\/li>|\/ul>|\/ol>|\/blockquote>|\/code>)\n/g, '<br>');
+
+    return response;
+}
+        
         function appendMessage(sender, message) {
             const chatMessages = document.getElementById('chatMessages');
             const messageElement = document.createElement('div');
@@ -405,7 +435,6 @@
             }
         });
     
-        // Add event listener for Enter key press
         document.getElementById('userInput').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 sendMessage();
@@ -414,7 +443,6 @@
     </script>
     
     <style>
-        /* Loading dots animation */
         .loading {
             display: flex;
             align-items: center;
