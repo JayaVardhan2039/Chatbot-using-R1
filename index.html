@@ -276,73 +276,94 @@
         </div>
     </div>
     <script>
-function sendMessage() {
-    let userMessage = document.getElementById("userInput").value.trim();
-    if (!userMessage) return;
+        function sendMessage() {
+            let userMessage = document.getElementById("userInput").value.trim();
+            if (!userMessage) return;
 
-    let chatbox = document.querySelector(".chat-messages");
+            let chatbox = document.querySelector(".chat-messages");
 
-    // Append user message
-    let userMsgDiv = document.createElement("div");
-    userMsgDiv.classList.add("message", "user");
-    userMsgDiv.innerHTML = `
-        <div class="avatar">U</div>
-        <div class="message-content">${userMessage}</div>
-    `;
-    chatbox.appendChild(userMsgDiv);
+            // Append user message
+            let userMsgDiv = document.createElement("div");
+            userMsgDiv.classList.add("message", "user");
+            userMsgDiv.innerHTML = `
+                <div class="avatar">U</div>
+                <div class="message-content">${userMessage}</div>
+            `;
+            chatbox.appendChild(userMsgDiv);
 
-    document.getElementById("userInput").value = "";
-    chatbox.scrollTop = chatbox.scrollHeight;
+            document.getElementById("userInput").value = "";
+            chatbox.scrollTop = chatbox.scrollHeight;
 
-    // Add loading animation
-    let loadingDiv = document.createElement("div");
-    loadingDiv.classList.add("message", "bot");
-    loadingDiv.id = "loadingMessage";
-    loadingDiv.innerHTML = `
-        <div class="avatar">AI</div>
-        <div class="message-content loading">
-            <span></span><span></span><span></span>
-        </div>
-    `;
-    chatbox.appendChild(loadingDiv);
-    chatbox.scrollTop = chatbox.scrollHeight;
+            // Hide buttons and show stop button
+            document.querySelectorAll('.chat-input button').forEach(button => button.style.display = 'none');
+            let stopButton = document.createElement("button");
+            stopButton.classList.add("stop-button");
+            stopButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="6" width="12" height="12"></rect>
+                </svg>
+            `;
+            stopButton.onclick = function() {
+                controller.abort();
+                document.getElementById("loadingMessage").remove();
+                document.querySelectorAll('.chat-input button').forEach(button => button.style.display = 'flex');
+                stopButton.remove();
+            };
+            document.querySelector('.chat-input').appendChild(stopButton);
 
-    // Fetch bot response
-    fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById("loadingMessage").remove(); // Remove loading animation
+            // Add loading animation
+            let loadingDiv = document.createElement("div");
+            loadingDiv.classList.add("message", "bot");
+            loadingDiv.id = "loadingMessage";
+            loadingDiv.innerHTML = `
+                <div class="avatar">AI</div>
+                <div class="message-content loading">
+                    <span></span><span></span><span></span>
+                </div>
+            `;
+            chatbox.appendChild(loadingDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
 
-        let botMsgDiv = document.createElement("div");
-        botMsgDiv.classList.add("message", "bot");
-        botMsgDiv.innerHTML = `
-            <div class="avatar">AI</div>
-            <div class="message-content">${formatResponse(data.response)}</div>
-        `;
-        chatbox.appendChild(botMsgDiv);
-        chatbox.scrollTop = chatbox.scrollHeight;
-    })
-    .catch(error => {
-        document.getElementById("loadingMessage").remove(); // Remove loading animation on error
-        console.error("Error:", error);
-    });
-}
+            // Fetch bot response with abort controller
+            const controller = new AbortController();
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: userMessage }),
+                signal: controller.signal
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("loadingMessage").remove(); // Remove loading animation
+                stopButton.remove(); // Remove stop button
+                document.querySelectorAll('.chat-input button').forEach(button => button.style.display = 'flex');
 
-// Function to format response with proper indentation
-function formatResponse(response) {
-    return response.replace(/\n/g, "<br>"); // Converts new lines to <br> for formatting
-}
+                let botMsgDiv = document.createElement("div");
+                botMsgDiv.classList.add("message", "bot");
+                botMsgDiv.innerHTML = `
+                    <div class="avatar">AI</div>
+                    <div class="message-content">${formatResponse(data.response)}</div>
+                `;
+                chatbox.appendChild(botMsgDiv);
+                chatbox.scrollTop = chatbox.scrollHeight;
+            })
+            .catch(error => {
+                if (error.name === 'AbortError') {
+                    console.log("Fetch aborted");
+                } else {
+                    console.error("Error:", error);
+                }
+                document.getElementById("loadingMessage").remove(); // Remove loading animation on error
+                stopButton.remove(); // Remove stop button
+                document.querySelectorAll('.chat-input button').forEach(button => button.style.display = 'flex');
+            });
+        }
 
-// Function to format response with proper indentation
-function formatResponse(response) {
-    return response.replace(/\n/g, "<br>"); // Converts new lines to <br> for formatting
-}
+        // Function to format response with proper indentation
+        function formatResponse(response) {
+            return response.replace(/\n/g, "<br>"); // Converts new lines to <br> for formatting
+        }
 
-    
         function appendMessage(sender, message) {
             const chatMessages = document.getElementById('chatMessages');
             const messageElement = document.createElement('div');
@@ -425,92 +446,5 @@ function formatResponse(response) {
         }
     </style>
     
-   <!-- <script>
-        function sendMessage() {
-            let userMessage = document.getElementById("userInput").value.trim();
-            if (!userMessage) return;
-    
-            let chatbox = document.querySelector(".chat-messages");
-    
-            // Append user message
-            let userMsgDiv = document.createElement("div");
-            userMsgDiv.classList.add("message", "user");
-            userMsgDiv.innerHTML = `
-                <div class="avatar">U</div>
-                <div class="message-content">${userMessage}</div>
-            `;
-            chatbox.appendChild(userMsgDiv);
-    
-            document.getElementById("userInput").value = "";
-            chatbox.scrollTop = chatbox.scrollHeight;
-    
-            // Fetch bot response
-            fetch('/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: userMessage })
-            })
-            .then(response => response.json())
-            .then(data => {
-                let botMsgDiv = document.createElement("div");
-                botMsgDiv.classList.add("message", "bot");
-                botMsgDiv.innerHTML = `
-                    <div class="avatar">AI</div>
-                    <div class="message-content">${data.response}</div>
-                `;
-                chatbox.appendChild(botMsgDiv);
-                chatbox.scrollTop = chatbox.scrollHeight;
-            })
-            .catch(error => console.error("Error:", error));
-        }
-
-        function appendMessage(sender, message) {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${sender}`;
-            messageElement.innerHTML = `
-                <div class="avatar">${sender === 'user' ? 'U' : 'AI'}</div>
-                <div class="message-content">${message}</div>
-            `;
-            chatMessages.appendChild(messageElement);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function recordVoice() {
-            alert('Voice recording feature coming soon!');
-        }
-
-        function toggleFileOptions() {
-            const fileOptions = document.getElementById('fileOptions');
-            const plusIcon = document.getElementById('plusIcon');
-            fileOptions.classList.toggle('show');
-            plusIcon.style.transform = fileOptions.classList.contains('show') ? 'rotate(45deg)' : 'rotate(0deg)';
-        }
-
-        function handleUpload(type) {
-            alert(`${type} upload feature coming soon!`);
-            toggleFileOptions();
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-        }
-
-        document.addEventListener('click', function(event) {
-            const fileOptions = document.getElementById('fileOptions');
-            const toggleButton = document.querySelector('.toggle-button');
-            if (!event.target.closest('.file-options') && !event.target.closest('.toggle-button')) {
-                fileOptions.classList.remove('show');
-                document.getElementById('plusIcon').style.transform = 'rotate(0deg)';
-            }
-        });
-
-        // Add event listener for Enter key press
-        document.getElementById('userInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    </script>-->
 </body>
-</html> 
+</html>
