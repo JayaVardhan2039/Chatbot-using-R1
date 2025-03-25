@@ -1,52 +1,26 @@
-'''from openai import OpenAI
-
-client = OpenAI(
-<<<<<<< HEAD
-  base_url=BASE_URL,
-  api_key=API_KEY,
-=======
-  base_url="<base-url>",
-  api_key="<your-api-key>",
->>>>>>> 32fcf0dd1a2a171889fd85f58e62d667c87144ec
-)
-
-completion = client.chat.completions.create(
-  model="deepseek/deepseek-r1:free",
-  messages=[
-    {
-      "role": "user",
-      "content": "What is the meaning of DSA?"
-    }
-  ]
-)
-
-print(completion.choices[0].message.content)
-'''
-import os
 from flask import Flask, send_file, request, jsonify
 from openai import OpenAI
-from config import BASE_URL, API_KEY
+from flask_cors import CORS
+import os
 
 app = Flask(__name__)
-
-BASE_URL = os.getenv("BASE_URL")
-API_KEY = os.getenv("API_KEY")
+CORS(app)
 # Initialize OpenAI client
 client = OpenAI(
-    base_url=BASE_URL,
-    api_key=API_KEY  # Replace with your actual API key
+    base_url=os.getenv('BASE_URL', 'https://openrouter.ai/api/v1'),
+    api_key=os.getenv('API_KEY')
 )
 
 @app.route('/')
 def index():
-    return send_file('index.html')  # Serve index.html from the root folder
+    return send_file('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json.get("message")
     
     if not user_message:
-        return jsonify({"response": "Please enter a message."})
+        return jsonify({"response": "Please enter a message."}), 400
     
     try:
         completion = client.chat.completions.create(
@@ -54,10 +28,10 @@ def chat():
             messages=[{"role": "user", "content": user_message}]
         )
         bot_response = completion.choices[0].message.content
+        return jsonify({"response": bot_response}), 200
     except Exception as e:
-        bot_response = "Error: Unable to process the request."
-    
-    return jsonify({"response": bot_response})
+        print(f"Error: {str(e)}")  # Add logging
+        return jsonify({"response": "A server error occurred"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
