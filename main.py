@@ -22,13 +22,15 @@ completion = client.chat.completions.create(
 
 print(completion.choices[0].message.content)
 '''
+import os
 from flask import Flask, send_file, request, jsonify
 from openai import OpenAI
 from config import BASE_URL, API_KEY
 
 app = Flask(__name__)
 
-
+BASE_URL = os.getenv("BASE_URL")
+API_KEY = os.getenv("API_KEY")
 # Initialize OpenAI client
 client = OpenAI(
     base_url=BASE_URL,
