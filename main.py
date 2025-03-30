@@ -35,7 +35,7 @@ def chat():
         return jsonify({"response": bot_response}), 200
     except Exception as e:
         print(f"Error: {str(e)}")  # Add logging
-        return jsonify({"response": "A server error occurred"}), 500
+        return jsonify({"response": "A server error occurred"}), 500  # Ensure JSON response
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
