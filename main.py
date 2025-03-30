@@ -3,6 +3,11 @@ from openai import OpenAI
 from flask_cors import CORS
 import os
 
+# Load configuration from config.py
+from config import BASE_URL, API_KEY
+os.environ['BASE_URL'] = BASE_URL
+os.environ['API_KEY'] = API_KEY
+
 app = Flask(__name__)
 CORS(app)
 # Initialize OpenAI client
