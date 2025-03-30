@@ -21,17 +21,17 @@ cd Chatbot using R1
 pip install -r requirements.txt
 ```
 
-3. Create a `config.py` file in the root directory with your API credentials:
-```python
-BASE_URL = "your-base-url"
-API_KEY = "your-api-key-here"
+3. Create a `.env` file in the root directory with your API credentials:
+```env
+BASE_URL=https://openrouter.ai/api/v1
+API_KEY=your-api-key-here
 ```
 
 ## How to Get an API Key
 
 1. Visit [OpenRouter's website](https://openrouter.ai).
 2. Sign up and generate an API key.
-3. Replace `"your-api-key-here"` in `config.py` with your actual API key.
+3. Replace `"your-api-key-here"` in `.env` with your actual API key.
 
 ## Running the Chatbot
 
@@ -64,8 +64,6 @@ completion = client.chat.completions.create(
 ```
 
 Ensure to replace `"deepseek/deepseek-r1:free"` with the desired model name.
-
-
 
 ## Contributing
 

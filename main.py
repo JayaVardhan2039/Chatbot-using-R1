@@ -1,12 +1,11 @@
 from flask import Flask, send_file, request, jsonify
 from openai import OpenAI
 from flask_cors import CORS
+from dotenv import load_dotenv
 import os
 
-# Load configuration from config.py
-from config import BASE_URL, API_KEY
-os.environ['BASE_URL'] = BASE_URL
-os.environ['API_KEY'] = API_KEY
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
